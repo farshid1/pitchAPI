@@ -1,4 +1,5 @@
 var pitches = require('./controllers/pitch.js');
+var users = require('./controllers/user.js');
 //var User = require('./controllers/user.js');
 module.exports = function(router) {
 
@@ -25,6 +26,13 @@ module.exports = function(router) {
 	router.route('/pitch/:id').get(pitches.getPitch);
 	router.route('/pitch/:id').post(pitches.updatePitch);
 	router.route('/pitch/:id').delete(pitches.deletePitch);
+
+	// Users Routes
+	router.route('/user').get(users.getAllUsers);
+	router.route('/user').post(users.createUser);
+	router.route('/user/:id').get(users.getUser);
+	router.route('/user/:id').post(users.updateUser);
+	router.route('/user/:id').delete(users.deleteUser);
 
 
 

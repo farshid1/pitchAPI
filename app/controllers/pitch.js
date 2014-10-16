@@ -12,21 +12,18 @@ exports.getAllPitches = function(req, res) {
 // Create a pitch
 exports.createPitch = function(req, res) {
 
-	//console.log(req);
-	// var pitch = new Pitch({
-	// 	total: req.body.title,
+
 	pitch = new Pitch();
-	// });
+
 	pitch.title = req.body.title;
 	pitch.tags = [];
 	_.each(req.body.tags, function(tag){
 		pitch.tags.push(tag);
 	});
-
 	pitch.description = req.body.description;
-
 	pitch.location = req.body.location;
 
+	
 	pitch.save(function(err, pitch){
 		if (err) console.error(err);
 		console.log(pitch, "yo what up")
