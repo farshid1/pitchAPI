@@ -11,11 +11,9 @@ var router = express.Router();
 
 
 //database setuo
-var mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost:27017/pich-db");
+// var mongoose = require('mongoose');
+// mongoose.connect("mongodb://localhost:27017/pich-db");
 
-// our pitch model =========================================
-var Picth = require('./app/models/pitch.js');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST

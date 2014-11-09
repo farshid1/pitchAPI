@@ -1,49 +1,84 @@
-var mongoose = require('mongoose');
 var Pitch = require('../models/pitch.js');
-var _=require('underscore');
 
-// Get all pitches
-exports.getAllPitches = function(req, res) {
-	Pitch.find(function(err, pitches) {
-		res.jsonp(pitches);
-	});
+/**
+ * GET /pitch
+ */
+exports.getAllPitches = function(req, res, next) {
+	Pitch.getAll(function (err, pitches) {
+        if (err) return next(err);
+        res.jsonp(pitches);
+    });
 }
 
-// Create a pitch
-exports.createPitch = function(req, res) {
 
+/**
+ * POST /pitch
+ */
+exports.createPitch = function(req, res, next) {
 
-	pitch = new Pitch();
+	var pitch = {};
+	var location = {};
+	var data = {};
 
 	pitch.title = req.body.title;
-	pitch.tags = [];
-	_.each(req.body.tags, function(tag){
-		pitch.tags.push(tag);
-	});
 	pitch.description = req.body.description;
-	pitch.location = req.body.location;
+	pitch.date = req.body.date;
+	pitch.time = req.body.time;
 
-	
-	pitch.save(function(err, pitch){
-		if (err) console.error(err);
-		console.log(pitch, "yo what up")
-		res.jsonp(pitch);
-	});
+	location.city = req.body.city;
+	location.state = req.body.state;
+	location.address = req.body.address;
+	location.zip = req.body.zip;
 
+	data.location = location;
+	data.pitch = pitch;
+	data.userEmail = req.body.userEmail;
+	console.log(data);
+
+	Pitch.create(data, function (err, node) {
+        if (err) return next(err);
+        //res.redirect('/pitchs/' + pitch.id);
+        console.log(node);
+		res.jsonp(node);
+    });
+
+};
+
+/**
+ * GET /pitch/:id
+ */
+exports.getPitch = function(req, res, next) {
+	Pitch.get(req.params.id,function (err, pitch) {
+        if (err) return next(err);
+        res.jsonp(pitch);
+    });
 }
 
-// Get a pitch
-exports.getPitch = function(req, res) {
-	res.json({ message: 'Bear created!' });
-}
+/**
+ * PUT /pitch/:id
+ */
+exports.updatePitch = function(req, res, next) {
+	var pitch = {};
+	var location = {};
+	var data = {};
 
-// Update a pitch
-exports.updatePitch = function(req, res) {
-	res.json({ message: 'Bear created!' });
-}
+	pitch.title = req.body.title;
+	pitch.description = req.body.description;
+	pitch.date = req.body.date;
+	pitch.time = req.body.time;
 
-// Delete a pitch
-exports.deletePitch = function(req, res) {
-	res.json({ message: 'Bear created!' });
-}
+	location.city = req.body.city;
+	location.state = req.body.state;
+	location.address = req.body.address;
+	location.zip = req.body.zip;
 
+	data.location = location;
+	data.pitch = pitch;
+	data.userEmail = req.body.userEmail;
+
+	Pitch.get(req.params.id,function (err, p) {
+        if (err) return next(err);
+        
+        res.jsonp(pitch);
+    });
+}

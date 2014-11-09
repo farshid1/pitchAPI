@@ -24,15 +24,17 @@ module.exports = function(router) {
 	router.route('/pitch').get(pitches.getAllPitches);
 	router.route('/pitch').post(pitches.createPitch);
 	router.route('/pitch/:id').get(pitches.getPitch);
-	router.route('/pitch/:id').post(pitches.updatePitch);
-	router.route('/pitch/:id').delete(pitches.deletePitch);
+	router.route('/pitch/:id').put(pitches.updatePitch);
+	// router.route('/pitch/:id').delete(pitches.deletePitch);
 
 	// Users Routes
-	router.route('/user').get(users.getAllUsers);
-	router.route('/user').post(users.createUser);
-	router.route('/user/:id').get(users.getUser);
-	router.route('/user/:id').post(users.updateUser);
-	router.route('/user/:id').delete(users.deleteUser);
+	router.route('/users').get(users.getAllUsers);
+	router.route('/users').post(users.createUser);
+	router.route('/users/:id').get(users.getUser);
+	router.route('/users/:id').put(users.updateUser);
+	router.route('/users/:id').delete(users.deleteUser);
+
+	//router.route('/users/:userId/pitch/:pitchId').get(users.attendsPitch);	
 
 
 

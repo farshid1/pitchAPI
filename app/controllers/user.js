@@ -1,20 +1,32 @@
-var mongoose = require('mongoose');
 var User = require('../models/user.js');
-var _=require('underscore');
 
-// Get all users
-exports.getAllUsers = function(req, res) {
-	User.find(function(err, pitches) {
-		res.jsonp(pitches);
+/**
+ * GET /users
+ */
+exports.getAllUsers = function(req, res, next) {
+	User.getAll(function (err, users) {
+        if (err) return next(err);
+        res.jsonp(users);
+    });
+}
+
+/**
+ * GET /users/:id
+ */
+exports.getUser = function(req, res, next) {
+	User.get(req.params.id, function(err, user) {
+		if (err) return next(err);
+		console.log(user._node.data);
+		res.jsonp(user._node.data);
 	});
 }
 
-// Create a user
-exports.createUser = function(req, res) {
+/**
+ * POST /users
+ */
+exports.createUser = function(req, res, next) {
 
-
-	user = new User();
-	
+	user = {};
 	user.username = req.body.username;
 	user.displayName = req.body.displayName;
 	user.password = req.body.password;
@@ -22,28 +34,39 @@ exports.createUser = function(req, res) {
 	user.city = req.body.city;
 	user.state = req.body.state;
 
+	User.create(user, function (err, node) {
+        if (err) return next(err);
+        //res.redirect('/users/' + user.id);
+        console.log(node._node.data);
+		res.jsonp(node._node.data);
+    });
 
-	
-	user.save(function(err, user){
-		if (err) console.error(err);
-		console.log(user, "yo what up")
+};
+
+
+/**
+ * PUT /users/:id
+ */
+exports.updateUser = function(req, res, next) {
+	User.get(req.params.id, function(err, user) {
+		if (err) return next(err);
+		console.log(user);
+		
 		res.jsonp(user);
-	});
+	})
 
-}
+};
 
-// Get a user
-exports.getUser = function(req, res) {
-	res.json({ message: 'Bear created!' });
-}
-
-// Update a user
-exports.updateUser = function(req, res) {
-	res.json({ message: 'Bear created!' });
-}
-
-// Delete a user
-exports.deleteUser = function(req, res) {
-	res.json({ message: 'Bear created!' });
+/**
+ * DELETE /users/:id
+ */
+exports.deleteUser = function(req, res, next) {
+	 User.get(req.params.id, function (err, user) {
+        if (err) return next(err);
+        user.del(function (err) {
+            if (err) return next(err);
+            res.jsonp({status:"success"});
+        });
+    });
 }
 
