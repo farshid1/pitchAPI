@@ -5,7 +5,7 @@ var neo4j = require('neo4j');
 var db = new neo4j.GraphDatabase(
     process.env['NEO4J_URL'] ||
     process.env['GRAPHENEDB_URL'] ||
-    'http://192.168.2.6:7474'
+    'http://10.67.16.86:7474'
 );
 
 // private constructor:
@@ -148,26 +148,18 @@ User.getAll = function (callback) {
     });
 };
 
-// creates the user and persists (saves) it to the db, incl. indexing it:
-User.create = function (data, callback) {
-    // construct a new instance of our class with the data, so it can
-    // validate and extend it, etc., if we choose to do that in the future:
-    var node = db.createNode(data);
-    var user = new User(node);
-
-    // but we do the actual persisting with a Cypher query, so we can also
-    // apply a label at the same time. (the save() method doesn't support
-    // that, since it uses Neo4j's REST API, which doesn't support that.)
-    var query = [
-        'CREATE (user:User {data})',
-        'RETURN user',
-    ].join('\n');
-
+User.login = function (data, callback) {
     var params = {
         data: data
     };
+    console.log(data);
+    var query = [
+        'MATCH (user:User)',
+        'WHERE user.username ="'+ data.username + '" and user.password = "' + data.password + '"',
+        'RETURN user',
+    ].join('\n');
 
-    db.query(query, params, function (err, results) {
+    db.query(query, function (err, results) {
         if (err) return callback(err);
         console.log(results);
         var user = new User(results[0]['user']);
@@ -179,3 +171,6 @@ User.create = function (data, callback) {
 User.edit = function(data, callback) {
 
 };
+
+
+

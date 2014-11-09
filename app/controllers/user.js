@@ -70,3 +70,22 @@ exports.deleteUser = function(req, res, next) {
     });
 }
 
+/**
+ * POST /users/login
+ */
+exports.login = function(req, res, next) {
+
+	user = {};
+	user.username = req.body.username;
+	user.password = req.body.password;
+
+	User.login(user, function (err, userId) {
+        if (err) {
+        	//return next(err);
+        	res.jsonp({status: err});
+        	return;
+        }
+        res.jsonp({userId: userId});
+    });
+}
+

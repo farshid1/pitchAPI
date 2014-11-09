@@ -9,7 +9,7 @@
 
 //match (l:Location) where l.latitude = 33.877914 set l.address="800 N State College Blvd, Fullerton, CA 92831" return l
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase( 'http://10.67.16.86/:7474');
+var db = new neo4j.GraphDatabase( 'http://10.67.16.86:7474');
 
 // // private constructor:
 
@@ -171,20 +171,21 @@ Pitch.create = function (data, callback) {
     // but we do the actual persisting with a Cypher query, so we can also
     // apply a label at the same time. (the save() method doesn't support
     // that, since it uses Neo4j's REST API, which doesn't support that.)
+    var params = {
+        pitch: data.pitch,
+        location: data.location
+    };
     var query = [
-        'MATCH (u:Pitch {email: "'+data.PitchEmail+'"})',
+        'MATCH (u:User {email: "'+data.PitchEmail+'"})',
         'CREATE (p:Pitch {pitch})',
         'CREATE (l:Location {location})',
         'WITH p, l, u, timestamp() as ts',
         'CREATE (p)-[:LOCATED_IN]->(l)',
         'CREATE (u)-[:CREATED {time: ts}]->(p)',
-        'RETURN p',
+        'RETURN p'
     ].join('\n');
 
-    var params = {
-        pitch: data.pitch,
-        location: data.location
-    };
+    
 
     db.query(query, params, function (err, results) {
         if (err) return callback(err);
