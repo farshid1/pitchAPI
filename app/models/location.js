@@ -1,45 +1,35 @@
+var neo4j = require('neo4j');
+var db = new neo4j.GraphDatabase( 'http://192.168.2.4:7474');
 
-// //create (p:Location {title:"birthday", description:"descr", date:"09/19/1986",time:"8:30 pm"})
-// //create (l:Location {latitude: 33.8779140, longitude: -117.8900750}) return l
-// //match (l:Location),(p:Location) where id(l) = 9 and id(p) = 1 create (p)-[:LOCATED_IN]->(l)
+// // private constructor:
 
-// //with timestamp() as ts match (u:Location),(p:Location) where id(u) = 7 and id(p) = 0 create (u)-[:CREATED {time: ts}]->(p)
-// //with timestamp() as ts match (u:Location),(p:Location) where id(u) = 8    and id(p) = 1 create (u)-[:WATCHES {time: ts}]->(p)
-// //with timestamp() as ts match (u:Location),(p:Location) where id(u) = 8    and id(p) = 0 create (u)-[:ATTENDS {time: ts}]->(p)
+var Location = module.exports = function Location(_node) {
 
-// //match (l:Location) where l.latitude = 33.877914 set l.address="800 N State College Blvd, Fullerton, CA 92831" return l
-// var neo4j = require('neo4j');
-// var db = new neo4j.GraphDatabase( 'http://192.168.2.6:7474');
+    this._node = _node;
+}
 
-// // // private constructor:
+// public instance properties:
 
-// var Location = module.exports = function Location(_node) {
+Object.defineProperty(Location.prototype, 'id', {
+    get: function () { return this._node.id; }
+});
 
-//     this._node = _node;
-// }
+Object.defineProperty(Location.prototype, 'city', {
+    get: function () {
+        return this._node.data['city'];
+    },
+    set: function (city) {
+        this._node.data['city'] = city;
+    }
+});
 
-// // public instance properties:
+// public instance methods:
 
-// Object.defineProperty(Location.prototype, 'id', {
-//     get: function () { return this._node.id; }
-// });
-
-// Object.defineProperty(Location.prototype, 'title', {
-//     get: function () {
-//         return this._node.data['title'];
-//     },
-//     set: function (title) {
-//         this._node.data['title'] = title;
-//     }
-// });
-
-// // // public instance methods:
-
-// Location.prototype.save = function (callback) {
-//     this._node.save(function (err) {
-//         callback(err);
-//     });
-// };
+Location.prototype.save = function (callback) {
+    this._node.save(function (err) {
+        callback(err);
+    });
+};
 
 // Location.prototype.del = function (callback) {
 //     // use a Cypher query to delete both this Location and his/her following
@@ -47,8 +37,8 @@
 //     // (note that this'll still fail if there are any relationships attached
 //     // of any other types, which is good because we don't expect any.)
 //     var query = [
-//         'MATCH (Location:Location)',
-//         'WHERE ID(Location) = {LocationId}',
+//         'MATCH (l:Location)',
+//         'WHERE ID(l) = {locationId}',
 //         'DELETE Location',
 //         'WITH Location',
 //         'MATCH (Location) -[rel:follows]- (other)',
@@ -56,7 +46,7 @@
 //     ].join('\n')
 
 //     var params = {
-//         LocationId: this.id
+//         locationId: this.id
 //     };
 
 //     db.query(query, params, function (err) {
@@ -64,91 +54,22 @@
 //     });
 // };
 
-// // Location.prototype.follow = function (other, callback) {
-// //     this._node.createRelationshipTo(other._node, 'follows', {}, function (err, rel) {
-// //         callback(err);
-// //     });
-// // };
 
-// // Location.prototype.unfollow = function (other, callback) {
-// //     var query = [
-// //         'MATCH (Location:Location) -[rel:follows]-> (other:Location)',
-// //         'WHERE ID(Location) = {LocationId} AND ID(other) = {otherId}',
-// //         'DELETE rel',
-// //     ].join('\n')
 
-// //     var params = {
-// //         LocationId: this.id,
-// //         otherId: other.id,
-// //     };
 
-// //     db.query(query, params, function (err) {
-// //         callback(err);
-// //     });
-// // };
 
-// // // calls callback w/ (err, following, others) where following is an array of
-// // // Locations this Location follows, and others is all other Locations minus him/herself.
-// // Location.prototype.getFollowingAndOthers = function (callback) {
-// //     // query all Locations and whether we follow each one or not:
-// //     var query = [
-// //         'MATCH (Location:Location), (other:Location)',
-// //         'OPTIONAL MATCH (Location) -[rel:follows]-> (other)',
-// //         'WHERE ID(Location) = {LocationId}',
-// //         'RETURN other, COUNT(rel)', // COUNT(rel) is a hack for 1 or 0
-// //     ].join('\n')
 
-// //     var params = {
-// //         LocationId: this.id,
-// //     };
 
-// //     var Location = this;
-// //     db.query(query, params, function (err, results) {
-// //         if (err) return callback(err);
+// static methods:
 
-// //         var following = [];
-// //         var others = [];
+Location.get = function (id, callback) {
+    db.getNodeById(id, function (err, node) {
+        if (err) return callback(err);
+        callback(null, new Location(node));
+    });
+};
 
-// //         for (var i = 0; i < results.length; i++) {
-// //             var other = new Location(results[i]['other']);
-// //             var follows = results[i]['COUNT(rel)'];
 
-// //             if (Location.id === other.id) {
-// //                 continue;
-// //             } else if (follows) {
-// //                 following.push(other);
-// //             } else {
-// //                 others.push(other);
-// //             }
-// //         }
-
-// //         callback(null, following, others);
-// //     });
-// // };
-
-// // static methods:
-
-// Location.get = function (id, callback) {
-//     db.getNodeById(id, function (err, node) {
-//         if (err) return callback(err);
-//         callback(null, new Location(node));
-//     });
-// };
-
-// Location.getAll = function (callback) {
-//     var query = [
-//         'MATCH (Location:Location)',
-//         'RETURN Location',
-//     ].join('\n');
-
-//     db.query(query, null, function (err, results) {
-//         if (err) return callback(err);
-//         var Locationes = results.map(function (result) {
-//             return new Location(result['Location']);
-//         });
-//         callback(null, Locationes);
-//     });
-// };
 
 // Location.updateLocation = function (id, callback) {
 //     db.getNodeById(id, function (err, node) {

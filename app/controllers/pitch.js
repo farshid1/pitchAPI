@@ -1,4 +1,5 @@
 var Pitch = require('../models/pitch.js');
+var User = require('../models/user.js');
 
 /**
  * GET /pitch
@@ -76,9 +77,66 @@ exports.updatePitch = function(req, res, next) {
 	data.pitch = pitch;
 	data.userEmail = req.body.userEmail;
 
+//complete
 	Pitch.get(req.params.id,function (err, p) {
         if (err) return next(err);
         
         res.jsonp(pitch);
     });
-}
+};
+
+/**
+ * DELETE /pitch/:id
+ */
+exports.deletePitch = function(req, res, next) {
+	Pitch.get(req.params.id, function (err, pitch) {
+        if (err) return next(err);
+        pitch.del(function (err) {
+            if (err) return next(err);
+            res.jsonp({status: "success"});
+        });
+    });
+};
+
+/**
+ * GET pitch/:pid/comments
+ */
+exports.getComments = function(req, res, next) {
+	Pitch.get(req.params.id, function (err, pitch) {
+        if (err) return next(err);
+        pitch.getComment(function (err, comments) {
+            if (err) return next(err);
+            res.jsonp({
+            	status: "success",
+            	comments: comments
+            });
+        });
+    });
+};
+
+/**
+ * POST /user/:uid/comments/:pid
+ */
+exports.commentPitch = function(req, res, next) {
+	console.log(req.body);
+	User.get(req.params.uid, function(err, user) {
+		if (err) return next(err);
+		Pitch.get(req.params.pid, function(err, pitch) {
+			if (err) return next(err);
+			user.comment(pitch, req.body.commentText, function(err, comment) {
+				if (err) return next(err);
+				res.jsonp({
+					status: 'success',
+					comment: comment
+				});
+			});
+		});
+	});
+};
+
+/**
+ * GET pitch/search/:lat/:lon
+ */
+exports.searchPitchByLocation = function(req, res, next) {
+	
+};

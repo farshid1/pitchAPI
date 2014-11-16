@@ -1,21 +1,11 @@
-
-//create (p:Pitch {title:"birthday", description:"descr", date:"09/19/1986",time:"8:30 pm"})
-//create (l:Location {latitude: 33.8779140, longitude: -117.8900750}) return l
-//match (l:Location),(p:Pitch) where id(l) = 9 and id(p) = 1 create (p)-[:LOCATED_IN]->(l)
-
-//with timestamp() as ts match (u:Pitch),(p:Pitch) where id(u) = 7 and id(p) = 0 create (u)-[:CREATED {time: ts}]->(p)
-//with timestamp() as ts match (u:Pitch),(p:Pitch) where id(u) = 8    and id(p) = 1 create (u)-[:WATCHES {time: ts}]->(p)
-//with timestamp() as ts match (u:Pitch),(p:Pitch) where id(u) = 8    and id(p) = 0 create (u)-[:ATTENDS {time: ts}]->(p)
-
-//match (l:Location) where l.latitude = 33.877914 set l.address="800 N State College Blvd, Fullerton, CA 92831" return l
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase( 'http://10.67.16.86:7474');
+var db = new neo4j.GraphDatabase( 'http://pitchDB:c02R29XV94ZZb2VqaEWx@pitchdb.sb02.stations.graphenedb.com:24789');
+var User = require('./user.js');
 
-// // private constructor:
+// private constructor:
 
 var Pitch = module.exports = function Pitch(_node) {
-    // all we'll really store is the node; the rest of our properties will be
-    // derivable or just pass-through properties (see below).
+    console.log("here we are in constructor");
     this._node = _node;
 }
 
@@ -34,7 +24,7 @@ Object.defineProperty(Pitch.prototype, 'title', {
     }
 });
 
-// // public instance methods:
+// public instance methods:
 
 Pitch.prototype.save = function (callback) {
     this._node.save(function (err) {
@@ -43,18 +33,13 @@ Pitch.prototype.save = function (callback) {
 };
 
 Pitch.prototype.del = function (callback) {
-    // use a Cypher query to delete both this Pitch and his/her following
-    // relationships in one transaction and one network request:
-    // (note that this'll still fail if there are any relationships attached
-    // of any other types, which is good because we don't expect any.)
+
     var query = [
-        'MATCH (pitch:Pitch)',
-        'WHERE ID(pitch) = {pitchId}',
-        'DELETE pitch',
-        'WITH pitch',
-        'MATCH (pitch) -[rel:follows]- (other)',
-        'DELETE rel',
-    ].join('\n')
+        'MATCH (p:Pitch)',
+        'WHERE ID(p) = {pitchId}',
+        'OPTIONAL MATCH (p)-[r]-()',
+        'DELETE p,r',
+    ].join('\n');
 
     var params = {
         pitchId: this.id
@@ -65,11 +50,40 @@ Pitch.prototype.del = function (callback) {
     });
 };
 
-// Pitch.prototype.follow = function (other, callback) {
-//     this._node.createRelationshipTo(other._node, 'follows', {}, function (err, rel) {
-//         callback(err);
-//     });
-// };
+Pitch.prototype.getComments = function (callback) {
+
+
+    var query = [
+        'MATCH (u:User)-[c:COMMENTS]->(p:Pitch)',
+        'WHERE ID(p) = {pitchId}',
+        'RETURN u.username, c.time, c.commentTime',
+        'ORDER BY c.time',
+    ].join('\n');
+
+    var params = {
+        pitchId: this.id
+    };
+
+    db.query(query, params, function (err, results) {
+        if (err) return callback(err);
+        var comments = [];
+        if (results.length > 0) {
+            //console.log(results[0]['user']);
+            
+            for (var i = 0; i < results.length; i++) {
+                var comment = {
+                    user: results[i]['u.username'],
+                    comment: results[i]['c.commentText'],
+                    time: results[i]['c.commentTime']
+                };
+                comments.push(comment);
+            }
+            return callback(null, comments);
+        }
+        return callback("No comment");
+
+    });
+};    
 
 // Pitch.prototype.unfollow = function (other, callback) {
 //     var query = [
@@ -167,10 +181,6 @@ Pitch.create = function (data, callback) {
     var locationNode = db.createNode(data.location);
     var l = new Pitch(locationNode);
 
-
-    // but we do the actual persisting with a Cypher query, so we can also
-    // apply a label at the same time. (the save() method doesn't support
-    // that, since it uses Neo4j's REST API, which doesn't support that.)
     var params = {
         pitch: data.pitch,
         location: data.location
@@ -194,6 +204,3 @@ Pitch.create = function (data, callback) {
         callback(null, pitch);
     });
 };
-
-// //Edit Pitch
-// Pitch.edit

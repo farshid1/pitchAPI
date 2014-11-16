@@ -1,36 +1,65 @@
-var pitches = require('./controllers/pitch.js');
+var pitch = require('./controllers/pitch.js');
 var user = require('./controllers/user.js');
-//var User = require('./controllers/user.js');
-module.exports = function(router) {
+var auth = require('./controllers/auth.js');
 
+module.exports = function(router) {
 	// route middleware that will happen on every request
 	router.use(function(req, res, next) {
 
 		// log each request to the console
 		console.log(req.method, req.url);
-		console.log("hey man");
 		// continue doing what we were doing and go to the route
 		next();	
 	});
 
-	// Pitches Routes
-	router.route('/pitch').get(pitches.getAllPitches);
-	router.route('/pitch').post(pitches.createPitch);
-	router.route('/pitch/:id').get(pitches.getPitch);
-	router.route('/pitch/:id').put(pitches.updatePitch);
-	// router.route('/pitch/:id').delete(pitches.deletePitch);
-
+	router.route('/')
+			.get(function(req, res, next) {
+				res.jsonp({hey: "i'm working"});
+			});
 	// Users Routes
-	router.route('/user').get(user.getAllUsers);
-	router.route('/user').post(user.createUser);
-	router.route('/user/:id').get(user.getUser);
-	router.route('/user/:id').put(user.updateUser);
-	router.route('/user/:id').delete(user.deleteUser);
+	router.route('/user')
+			.post(user.createUser);
 
-	router.route('/user/login').post(user.login);
+	router.route('/user/:id')
+			.get(auth.isAuthenticated, user.getUserById)
+			.put(auth.isAuthenticated, user.updateUser)
+			.delete(auth.isAuthenticated, user.deleteUser);
 
-	//router.route('/users/:userId/pitch/:pitchId').get(users.attendsPitch);	
+	router.route('/user/:id')
+			.get(auth.isAuthenticated, user.getUserByUsername);
 
+	router.route('/user/login')
+			.post(user.login);
+	//Action Routes
+	router.route('/user/:id/attend')
+			.get(auth.isAuthenticated, user.getAttendingPitches);
 
+	router.route('/user/:id/myPitches')
+			.get(auth.isAuthenticated, user.getMyPitches);
+
+	router.route('/user/:uid/attend/:pid')
+			.post(auth.isAuthenticated, user.attendPitch)
+			.delete(auth.isAuthenticated, user.unattend);
+
+	router.route('/user/:uid/notification')
+			.get(auth.isAuthenticated, user.getNotification);
+
+	router.route('/user/:uid/comments/:pid')
+		.post(auth.isAuthenticated, pitch.commentPitch);
+
+	// Pitches Routes
+	router.route('/pitch')
+			.post(auth.isAuthenticated, pitch.createPitch);
+
+	router.route('/pitch/:id')
+			.get(auth.isAuthenticated, pitch.getPitch)
+			.put(auth.isAuthenticated, pitch.updatePitch)
+			.delete(auth.isAuthenticated, pitch.deletePitch);
+
+	router.route('/pitch/:id/comments')
+			.get(auth.isAuthenticated, pitch.getComments);
+
+	router.route('/pitch/search/:lat/:lon')
+			.get(auth.isAuthenticated, pitch.searchPitchByLocation);
 
 };

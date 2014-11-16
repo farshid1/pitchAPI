@@ -8,7 +8,8 @@ var express    = require('express'); 		// call express
 var app        = express(); 				// define our app using express
 var bodyParser = require('body-parser');
 var router = express.Router(); 
-
+var session = require('express-session');
+var passport = require('passport');
 
 //database setuo
 // var mongoose = require('mongoose');
@@ -19,9 +20,9 @@ var router = express.Router();
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(passport.initialize());
 
-var port = process.env.PORT || 8080; 		// set our port
-
+var port = process.env.PORT || 80; 
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
