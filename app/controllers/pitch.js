@@ -107,7 +107,6 @@ exports.getComments = function(req, res, next) {
         pitch.getComment(function (err, comments) {
             if (err) return next(err);
             res.jsonp({
-            	status: "success",
             	comments: comments
             });
         });
@@ -126,7 +125,6 @@ exports.commentPitch = function(req, res, next) {
 			user.comment(pitch, req.body.commentText, function(err, comment) {
 				if (err) return next(err);
 				res.jsonp({
-					status: 'success',
 					comment: comment
 				});
 			});

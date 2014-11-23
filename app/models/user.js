@@ -219,6 +219,7 @@ User.prototype.getNotification = function (callback) {
             //console.log(results);
             var notifications = [];
             for (var i = 0; i < results.length; i++) {
+                //TODO Change all the time names to time...
                 console.log(results[i]['attendee']._data.data.displayName);
                 var notification = extend(null, {pitch: results[i]['p']._data.data.title},
                             {detail: results[i]['a']._data.data},

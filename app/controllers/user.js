@@ -99,7 +99,6 @@ exports.login = function(req, res, next) {
         console.log(user._node.data);
         if (user._node.data.password == req.body.password) {
         	res.jsonp({
-        		status: "success",
         		userId: user.id
         	});
         	return;
@@ -121,7 +120,6 @@ exports.getAttendingPitches = function(req, res, next) {
         user.getAttendingPitches(function (err, pitches) {
             if (err) return next(err);
             res.jsonp({
-            	status:"success",
             	pitches: pitches
             });
         });
@@ -137,7 +135,6 @@ exports.getMyPitches = function(req, res, next) {
 		user.getPiches(function(err, pitches) {
 			if (err) return next(err);
 			res.jsonp({
-				status:"success",
 				pitches: pitches
 			});
 		});
@@ -189,7 +186,6 @@ exports.getNotification = function(req, res, next) {
 		user.getNotification(function(err, notifications) {
 			if (err) return next(err);
 			res.jsonp({
-				status:'success',
 				notifications: notifications
 			});
 		})
