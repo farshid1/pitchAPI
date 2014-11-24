@@ -82,7 +82,7 @@ exports.getUserByUsername = function(req, res, next) {
         	res.jsonp({status: err});
         	return;
         }
-        res.jsonp({user: user});
+        res.jsonp(user);
     });
 };
 /**
@@ -119,9 +119,9 @@ exports.getAttendingPitches = function(req, res, next) {
 		if (err) return next(err);
         user.getAttendingPitches(function (err, pitches) {
             if (err) return next(err);
-            res.jsonp({
-            	pitches: pitches
-            });
+            res.jsonp(
+            	pitches
+            );
         });
 	});
 };
@@ -134,9 +134,9 @@ exports.getMyPitches = function(req, res, next) {
 		if (err) return next(err);
 		user.getPiches(function(err, pitches) {
 			if (err) return next(err);
-			res.jsonp({
-				pitches: pitches
-			});
+			res.jsonp(
+				pitches
+			);
 		});
 	});
 };
@@ -185,9 +185,9 @@ exports.getNotification = function(req, res, next) {
 		if (err) return next(err);
 		user.getNotification(function(err, notifications) {
 			if (err) return next(err);
-			res.jsonp({
-				notifications: notifications
-			});
+			res.jsonp(
+				notifications
+			);
 		})
 	});
 };

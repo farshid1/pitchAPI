@@ -106,9 +106,9 @@ exports.getComments = function(req, res, next) {
         if (err) return next(err);
         pitch.getComment(function (err, comments) {
             if (err) return next(err);
-            res.jsonp({
-            	comments: comments
-            });
+            res.jsonp(
+            	comments
+            );
         });
     });
 };
@@ -124,9 +124,9 @@ exports.commentPitch = function(req, res, next) {
 			if (err) return next(err);
 			user.comment(pitch, req.body.commentText, function(err, comment) {
 				if (err) return next(err);
-				res.jsonp({
-					comment: comment
-				});
+				res.jsonp(
+					comment
+				);
 			});
 		});
 	});
