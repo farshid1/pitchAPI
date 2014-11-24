@@ -104,7 +104,7 @@ exports.deletePitch = function(req, res, next) {
 exports.getComments = function(req, res, next) {
 	Pitch.get(req.params.id, function (err, pitch) {
         if (err) return next(err);
-        pitch.getComment(function (err, comments) {
+        pitch.getComments(function (err, comments) {
             if (err) return next(err);
             res.jsonp(
             	comments
