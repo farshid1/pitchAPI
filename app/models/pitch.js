@@ -56,7 +56,7 @@ Pitch.prototype.getComments = function (callback) {
     var query = [
         'MATCH (u:User)-[c:COMMENTS]->(p:Pitch)',
         'WHERE ID(p) = {pitchId}',
-        'RETURN u.username, c.time, c.commentTime',
+        'RETURN u.username, c.time, c.commentTime, c.commentText',
         'ORDER BY c.time',
     ].join('\n');
 
