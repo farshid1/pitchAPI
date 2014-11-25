@@ -23,7 +23,7 @@ module.exports = function(router) {
 
 	router.route('/user/:id')
 			.get(auth.isAuthenticated, user.getUserById)
-			.put(auth.isAuthenticated, user.updateUser)
+			.post(auth.isAuthenticated, user.updateUser)
 			.delete(auth.isAuthenticated, user.deleteUser);
 
 	router.route('/user/:id')

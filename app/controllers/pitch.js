@@ -62,24 +62,38 @@ exports.getPitch = function(req, res, next) {
 exports.updatePitch = function(req, res, next) {
 
 //complete
+	p = {};
 	Pitch.get(req.params.id,function (err, pitch) {
         if (err) return next(err);
+
         pitch.title = req.body.title;
+        p.title = req.body.title;
 		pitch.description = req.body.description;
+		p.description = req.body.description;
 		pitch.date = req.body.date;
+		p.date = req.body.date;
 		pitch.time = req.body.time;
+		p.time = req.body.time;
+
+		p.city = req.body.city;
+		p.state = req.body.state;
+		p.address = req.body.address;
+		p.zip = req.body.zip;
+
 		pitch.save(function(err) {
 			if (err) next(err);
-			Location.getByPitchId(pitch.id, function(err, location){
-				location.city = req.body.city;
-				location.state = req.body.state;
-				location.address = req.body.address;
-				location.zip = req.body.zip;
-				console.log("from the controller", location);
-				location.save(function(err){
-					if (err) next(err);
-					res.jsonp(pitch);
-				})
+			Location.updateByPitchId(pitch.id, p, function(err, location){
+
+				if (err) {next(err)};
+				console.log("from the controller", location.address);
+				
+				res.jsonp(p);
+
+				// location.save(function(err, l){
+				// 	if (err) next(err);
+				// 	console.log("from the controller location save:", l.address);
+				// 	res.jsonp(p);
+				// })
 			});
 		});
     });

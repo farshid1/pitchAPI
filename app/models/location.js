@@ -27,7 +27,7 @@ Object.defineProperty(Location.prototype, 'city', {
 
 Location.prototype.save = function (callback) {
     this._node.save(function (err) {
-        callback(err);
+        callback(err, this);
     });
 };
 
@@ -69,10 +69,11 @@ Location.get = function (id, callback) {
     });
 };
 
-Location.getByPitchId = function(pid, callback) {
+Location.updateByPitchId = function(pid, location, callback) {
     var query = [
         'MATCH (p:Pitch)-[:LOCATED_IN]->(l:Location)',
         'WHERE ID(p) = {pitchId}',
+        'SET l.city = "'+location.city+'",l.state = "'+location.state+'",l.address = "'+location.address+'",l.zip = "'+location.zip+'"',
         'RETURN l',
     ].join('\n');
 
@@ -82,8 +83,8 @@ Location.getByPitchId = function(pid, callback) {
 
     db.query(query, params, function (err, results) {
         if (err) return callback(err);
-        console.log("from location model",results[0]['l']);
         var location = new Location(results[0]['l']);
+        console.log("from location model",location);
         callback(null, location);
     });
 };
