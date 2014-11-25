@@ -18,6 +18,7 @@ module.exports = function(router) {
 			});
 	// Users Routes
 	router.route('/user')
+			.get(user.getAllUsers)
 			.post(user.createUser);
 
 	router.route('/user/:id')

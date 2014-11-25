@@ -38,8 +38,8 @@ exports.createUser = function(req, res, next) {
 	User.create(user, function (err, node) {
         if (err) return next(err);
         //res.redirect('/users/' + user.id);
-        console.log(node._node.data);
-		res.jsonp(node._node.data);
+        console.log(node);
+		res.jsonp(node);
     });
 
 };

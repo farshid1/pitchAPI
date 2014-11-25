@@ -296,7 +296,24 @@ User.getUserByUsername = function (username, callback) {
 
 //Create user
 User.create = function(data, callback) {
-    
+    var query = [
+        'CREATE (user:User {user})',
+        'RETURN user',
+    ].join('\n');
+
+    // var userNode = db.createNode(data);
+    // var u = new User(userNode);
+
+    var params = {
+        user: data
+    };
+
+    db.query(query, params, function (err, results) {
+        if (err) return callback(err);
+        //console.log(results);
+        var user = new User(results[0]['user']['data']);
+        callback(null, user);
+    });
 };
 //Edit user
 User.edit = function(data, callback) {
