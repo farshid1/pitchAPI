@@ -39,7 +39,7 @@ exports.createUser = function(req, res, next) {
         if (err) return next(err);
         //res.redirect('/users/' + user.id);
         console.log(node);
-		res.jsonp(node);
+		res.jsonp(node._node);
     });
 
 };

@@ -296,6 +296,7 @@ User.getUserByUsername = function (username, callback) {
 
 //Create user
 User.create = function(data, callback) {
+    console.log(data);
     var query = [
         'CREATE (user:User {user})',
         'RETURN user',

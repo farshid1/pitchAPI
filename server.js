@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
 
-var port = process.env.PORT || 80; 
+var port = process.env.PORT || 8080; 
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
