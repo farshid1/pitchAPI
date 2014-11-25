@@ -54,7 +54,7 @@ module.exports = function(router) {
 
 	router.route('/pitch/:id')
 			.get(auth.isAuthenticated, pitch.getPitch)
-			.put(auth.isAuthenticated, pitch.updatePitch)
+			.post(auth.isAuthenticated, pitch.updatePitch)
 			.delete(auth.isAuthenticated, pitch.deletePitch);
 
 	router.route('/pitch/:id/comments')
