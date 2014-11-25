@@ -186,7 +186,7 @@ Pitch.create = function (data, callback) {
         location: data.location
     };
     var query = [
-        'MATCH (u:User {email: "'+data.PitchEmail+'"})',
+        'MATCH (u:User {email: "'+data.userEmail+'"})',
         'CREATE (p:Pitch {pitch})',
         'CREATE (l:Location {location})',
         'WITH p, l, u, timestamp() as ts',

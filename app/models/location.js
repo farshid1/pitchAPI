@@ -1,5 +1,5 @@
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase( 'http://192.168.2.4:7474');
+var db = new neo4j.GraphDatabase( 'http://pitchDB:c02R29XV94ZZb2VqaEWx@pitchdb.sb02.stations.graphenedb.com:24789');
 
 // // private constructor:
 
@@ -69,7 +69,24 @@ Location.get = function (id, callback) {
     });
 };
 
+Location.getByPitchId = function(pid, callback) {
+    var query = [
+        'MATCH (p:Pitch)-[:LOCATED_IN]->(l:Location)',
+        'WHERE ID(p) = {pitchId}',
+        'RETURN l',
+    ].join('\n');
 
+    var params = {
+        pitchId: pid
+    };
+
+    db.query(query, params, function (err, results) {
+        if (err) return callback(err);
+        console.log("from location model",results[0]['l']);
+        var location = new Location(results[0]['l']);
+        callback(null, location);
+    });
+};
 
 // Location.updateLocation = function (id, callback) {
 //     db.getNodeById(id, function (err, node) {

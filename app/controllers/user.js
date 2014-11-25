@@ -52,8 +52,18 @@ exports.updateUser = function(req, res, next) {
 	User.get(req.params.id, function(err, user) {
 		if (err) return next(err);
 		//console.log(user);
+		user.displayName = req.body.displayName;
+		user.username = req.body.username;
+		user.email = req.body.email;
+		user.password = req.body.password ? req.body.password : user.password;
+		user.city = req.body.city;
+		user.state = req.body.state;
+		user.save(function(err) {
+			if (err) return next(err);
+			console.log("success");
+			res.jsonp(user);
+		})
 		
-		res.jsonp(user);
 	})
 
 };

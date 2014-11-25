@@ -1,5 +1,6 @@
 var Pitch = require('../models/pitch.js');
 var User = require('../models/user.js');
+var Location = require('../models/location.js');
 
 /**
  * GET /pitch
@@ -40,7 +41,7 @@ exports.createPitch = function(req, res, next) {
         if (err) return next(err);
         //res.redirect('/pitchs/' + pitch.id);
         console.log(node);
-		res.jsonp(node);
+		res.jsonp(node._node);
     });
 
 };
@@ -59,29 +60,28 @@ exports.getPitch = function(req, res, next) {
  * PUT /pitch/:id
  */
 exports.updatePitch = function(req, res, next) {
-	var pitch = {};
-	var location = {};
-	var data = {};
-
-	pitch.title = req.body.title;
-	pitch.description = req.body.description;
-	pitch.date = req.body.date;
-	pitch.time = req.body.time;
-
-	location.city = req.body.city;
-	location.state = req.body.state;
-	location.address = req.body.address;
-	location.zip = req.body.zip;
-
-	data.location = location;
-	data.pitch = pitch;
-	data.userEmail = req.body.userEmail;
 
 //complete
-	Pitch.get(req.params.id,function (err, p) {
+	Pitch.get(req.params.id,function (err, pitch) {
         if (err) return next(err);
-        
-        res.jsonp(pitch);
+        pitch.title = req.body.title;
+		pitch.description = req.body.description;
+		pitch.date = req.body.date;
+		pitch.time = req.body.time;
+		pitch.save(function(err) {
+			if (err) next(err);
+			Location.getByPitchId(pitch.id, function(err, location){
+				location.city = req.body.city;
+				location.state = req.body.state;
+				location.address = req.body.address;
+				location.zip = req.body.zip;
+				console.log("from the controller", location);
+				location.save(function(err){
+					if (err) next(err);
+					res.jsonp(pitch);
+				})
+			});
+		});
     });
 };
 
