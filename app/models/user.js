@@ -156,7 +156,8 @@ User.prototype.getAttendingPitches = function (callback) {
             for (var i = 0; i < results.length; i++) {
                 var pitch = extend(null, results[i]['a']._data.data, 
                             results[i]['p']._data.data,
-                            results[i]['l']._data.data);
+                            results[i]['l']._data.data,
+                            {id: results[i]['p'].id });
                 pitches.push(pitch);
 
             };
@@ -171,10 +172,10 @@ User.prototype.getAttendingPitches = function (callback) {
 User.prototype.getPiches = function (callback) {
 
     var query = [
-        'MATCH (u:User)-[r:ATTENDS|CREATED]->(p)',
+        'MATCH (u:User)-[c:CREATED]->(p:Pitch)-[:LOCATED_IN]->(l:Location)',
         'WHERE ID(u) = {userId}',
-        'RETURN p, type(r) as t',
-        'ORDER BY r.time, r.joinTime' 
+        'RETURN p, c, l',
+        'ORDER BY c.time' 
     ].join('\n')
 
     var params = {
@@ -188,8 +189,10 @@ User.prototype.getPiches = function (callback) {
             var pitches = [];
             for (var i = 0; i < results.length; i++) {
                 console.log(results[i].t);
-                var pitch = extend(null, results[i]['p']._data.data, 
-                            {type: results[i].t});
+                var pitch = extend(null, results[i]['c']._data.data,
+                            results[i]['p']._data.data,
+                            results[i]['l']._data.data,
+                            {id: results[i]['p'].id }); 
                 pitches.push(pitch);
 
             };

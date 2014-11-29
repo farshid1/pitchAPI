@@ -1,5 +1,11 @@
 var User = require('../models/user.js');
 var Pitch = require('../models/pitch.js');
+var multiparty = require('multiparty');
+var Dropbox = require("dropbox");
+var client = new Dropbox.Client({
+    key: "i61n5his3jx7r41",
+    secret: "c6t2w5o8ylxktmc"
+});
 
 /**
  * GET /users
@@ -35,9 +41,22 @@ exports.createUser = function(req, res, next) {
 	user.city = req.body.city;
 	user.state = req.body.state;
 
+	// var form = new multiparty.Form();
+
+	// form.parse(req, function(err, fields, files) {
+	// 	user.username = req.body.username;
+	// 	user.displayName = req.body.displayName;
+	// 	user.password = req.body.password;
+	// 	user.email = req.body.email;
+	// 	user.city = req.body.city;
+	// 	user.state = req.body.state;
+ //    });
+	
+
 	User.create(user, function (err, node) {
         if (err) return next(err);
-        //res.redirect('/users/' + user.id);
+        //upload file
+        client.
         console.log(node);
 		res.jsonp(node._node);
     });
