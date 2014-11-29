@@ -2,10 +2,12 @@ var User = require('../models/user.js');
 var Pitch = require('../models/pitch.js');
 var multiparty = require('multiparty');
 var Dropbox = require("dropbox");
+var geocoder = require('geocoder');
 var client = new Dropbox.Client({
     key: "i61n5his3jx7r41",
     secret: "c6t2w5o8ylxktmc"
 });
+
 
 /**
  * GET /users
@@ -148,9 +150,12 @@ exports.getAttendingPitches = function(req, res, next) {
 		if (err) return next(err);
         user.getAttendingPitches(function (err, pitches) {
             if (err) return next(err);
-            res.jsonp(
-            	pitches
-            );
+            if (pitches.length > 0) {
+				res.jsonp(pitches);
+			}
+			else {
+				res.jsonp({error: "empty"});
+			}
         });
 	});
 };
@@ -163,9 +168,12 @@ exports.getMyPitches = function(req, res, next) {
 		if (err) return next(err);
 		user.getPiches(function(err, pitches) {
 			if (err) return next(err);
-			res.jsonp(
-				pitches
-			);
+			if (pitches.length > 0) {
+				res.jsonp(pitches);
+			}
+			else {
+				res.jsonp({error: "empty"});
+			}
 		});
 	});
 };
@@ -214,9 +222,12 @@ exports.getNotification = function(req, res, next) {
 		if (err) return next(err);
 		user.getNotification(function(err, notifications) {
 			if (err) return next(err);
-			res.jsonp(
-				notifications
-			);
-		})
+			if (notifications.length > 0) {
+				res.jsonp(notifications);
+			}
+			else {
+				res.jsonp({error: "empty"});
+			}
+		});
 	});
 };

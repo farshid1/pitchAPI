@@ -1,6 +1,7 @@
 var Pitch = require('../models/pitch.js');
 var User = require('../models/user.js');
 var Location = require('../models/location.js');
+var geocoder = require('geocoder');
 
 /**
  * GET /pitch
@@ -27,10 +28,27 @@ exports.createPitch = function(req, res, next) {
 	pitch.date = req.body.date;
 	pitch.time = req.body.time;
 
-	location.city = req.body.city;
-	location.state = req.body.state;
-	location.address = req.body.address;
-	location.zip = req.body.zip;
+	// location.city = req.body.city;
+	// location.state = req.body.state;
+	// location.address = req.body.address;
+	// location.zip = req.body.zip;
+
+	address = location.address + " " + location.city + " " + location.state + " " + location.zip;
+	console.log(address);
+	//get locations coordinates
+	geocoder.geocode(address, function(err, data) {
+		//if (err) {next(err)};
+		console.log(data.status);
+		if (data.status !== 'OVER_QUERY_LIMIT' && data.status !== 'ZERO_RESULTS') {
+            location.lat = data.results[0].geometry.location.lat;
+			location.lng = data.results[0].geometry.location.lng;
+			console.log(data.results[0].geometry.location);
+        } else {
+            // google has a limit on the number of requests per rime 
+            return res.jsonp({error: "location does not exist"});
+        }
+		
+	});
 
 	data.location = location;
 	data.pitch = pitch;

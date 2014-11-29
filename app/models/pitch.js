@@ -198,9 +198,16 @@ Pitch.create = function (data, callback) {
     
 
     db.query(query, params, function (err, results) {
-        if (err) return callback(err);
+        if (err) {
+            console.log(err);
+            return callback(err);
+        }
         console.log(results);
-        var pitch = new Pitch(results[0]['p']['data']);
-        callback(null, pitch);
+        if (results.length > 0) {
+           var pitch = new Pitch(results[0]['p']['data']);
+           return callback(null, pitch); 
+        }
+        return callback("was it made?");
+            
     });
 };
