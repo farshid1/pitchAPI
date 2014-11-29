@@ -1,5 +1,5 @@
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase( 'http://pitchDB:c02R29XV94ZZb2VqaEWx@pitchdb.sb02.stations.graphenedb.com:24789');
+var db = new neo4j.GraphDatabase( 'http://pitchDB:8ectJEibffM5lK0wM5OZ@pitchdb.sb02.stations.graphenedb.com:24789');
 var User = require('./user.js');
 
 // private constructor:
@@ -185,8 +185,10 @@ Pitch.create = function (data, callback) {
         pitch: data.pitch,
         location: data.location
     };
+    console.log(data);
     var query = [
-        'MATCH (u:User {email: "'+data.userEmail+'"})',
+        'MATCH (u:User)',
+        'WHERE ID(u) = '+data.userID,
         'CREATE (p:Pitch {pitch})',
         'CREATE (l:Location {location})',
         'WITH p, l, u, timestamp() as ts',

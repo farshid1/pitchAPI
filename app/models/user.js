@@ -1,5 +1,5 @@
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase('http://pitchDB:c02R29XV94ZZb2VqaEWx@pitchdb.sb02.stations.graphenedb.com:24789');
+var db = new neo4j.GraphDatabase('http://pitchDB:8ectJEibffM5lK0wM5OZ@pitchdb.sb02.stations.graphenedb.com:24789');
 var extend = require('extend');
 var Pitch = require('./pitch.js');
 var Location = require('./location.js');
@@ -148,8 +148,8 @@ User.prototype.getAttendingPitches = function (callback) {
 
     db.query(query, params, function(err, results) {
         if (err) return callback(err);
-        console.log(results);
-        console.log(results.length);
+        //console.log(results);
+        //console.log(results.length);
         
         if (results.length > 0) {
 

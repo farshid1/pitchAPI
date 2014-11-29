@@ -19,6 +19,7 @@ exports.getAllPitches = function(req, res, next) {
  */
 exports.createPitch = function(req, res, next) {
 
+console.log("here we are");
 	var pitch = {};
 	var location = {};
 	var data = {};
@@ -33,7 +34,7 @@ exports.createPitch = function(req, res, next) {
 	// location.address = req.body.address;
 	// location.zip = req.body.zip;
 
-	address = location.address + " " + location.city + " " + location.state + " " + location.zip;
+	address = req.body.address + " " + req.body.city + " " + req.body.state + " " + req.body.zip;
 	console.log(address);
 	//get locations coordinates
 	geocoder.geocode(address, function(err, data) {
@@ -52,7 +53,7 @@ exports.createPitch = function(req, res, next) {
 
 	data.location = location;
 	data.pitch = pitch;
-	data.userEmail = req.body.userEmail;
+	data.userID = req.body.userID;
 	console.log(data);
 
 	Pitch.create(data, function (err, node) {
