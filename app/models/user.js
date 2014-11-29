@@ -148,7 +148,8 @@ User.prototype.getAttendingPitches = function (callback) {
 
     db.query(query, params, function(err, results) {
         if (err) return callback(err);
-        //console.log(results);
+        console.log(results);
+        console.log(results.length);
         
         if (results.length > 0) {
 

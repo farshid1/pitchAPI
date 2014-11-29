@@ -149,7 +149,9 @@ exports.getAttendingPitches = function(req, res, next) {
 	User.get(req.params.id, function (err, user) {
 		if (err) return next(err);
         user.getAttendingPitches(function (err, pitches) {
-            if (err) return next(err);
+            if (err) {
+            	return res.jsonp(err);
+            }
             if (pitches.length > 0) {
 				res.jsonp(pitches);
 			}
