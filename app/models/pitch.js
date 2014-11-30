@@ -232,8 +232,9 @@ Pitch.getAttendants = function(pid, cb) {
             for (var i = 0; i < results.length; i++) {
                 //TODO Change all the time names to time...
                 //console.log(results[i]['attendee']._data.data.displayName);
+                //console.log(results[i]['u'].id);
                 var attendant = extend(null, {attendant: results[i]['u']._data.data.username},
-                    {time: results[i]['a']._data.data.time});
+                    {time: results[i]['a']._data.data.time}, {userId: results[i]['u'].id});
                 attendants.push(attendant);
 
             };

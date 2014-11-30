@@ -90,7 +90,38 @@ User.prototype.del = function (callback) {
 //         callback(null, following, others);
 //     });
 // };
+User.prototype.isAttending = function(pitch){
+    var userAttending = {};
+    var pitchAttending = {};
 
+    this._node.outgoing("ATTENDS", function(err, results){
+        if (err) throw (err);
+
+        if (results.length > 0) {
+            userAttending = results
+        }
+    });
+
+    pitch._node.incoming("ATTENDS", function(err, rs){
+        if (err) throw (err);
+
+        if (rs.length > 0) {
+            pitchAttending = results;
+        }
+    });
+
+    for (var i=0; i<userAttending.length; i++) {
+        for (var j=0; j<pitchAttending.length; j++) {
+            if (userAttending[i] == pitchAttending[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+
+
+
+};
 User.prototype.attend = function (pitch, callback) {
 
     var attend = {

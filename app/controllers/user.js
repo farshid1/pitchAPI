@@ -219,12 +219,15 @@ exports.attendPitch = function(req, res, next) {
 		if (err) return next(err);
 		Pitch.get(req.params.pid, function(err, pitch) {
 			if (err) return next(err);
-			user.attend(pitch, function(err, status) {
-				if (err) return next(err);
-				res.jsonp({
-					status: status
-				});
-			});
+            if (!user.isAttending(pitch)) {
+                user.attend(pitch, function(err, status) {
+                    if (err) return next(err);
+                    return res.jsonp({status: status});
+                });
+            }
+
+            return res.jsonp({status: "duplicate"});
+
 		});
 	});
 };

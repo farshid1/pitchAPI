@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 var router = express.Router(); 
 var session = require('express-session');
 var passport = require('passport');
+var multer  = require('multer')
 
 //database setuo
 // var mongoose = require('mongoose');
@@ -21,6 +22,8 @@ var passport = require('passport');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(multer());
+
 
 var port = process.env.PORT || 8080; 
 
