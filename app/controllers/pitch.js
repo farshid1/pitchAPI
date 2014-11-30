@@ -1,7 +1,15 @@
 var Pitch = require('../models/pitch.js');
 var User = require('../models/user.js');
 var Location = require('../models/location.js');
-var geocoder = require('geocoder');
+var extend = require('extend');
+//var geocoder = require('geocoder');
+var AWS = require('aws-sdk');
+var s3Client = new AWS.S3({
+    accessKeyId: process.env.AWS_ID,
+    secretAccessKey: process.env.AWS_SECRET,
+    // See: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
+});
+var fs = require('fs');
 
 /**
  * GET /pitch
@@ -19,7 +27,6 @@ exports.getAllPitches = function(req, res, next) {
  */
 exports.createPitch = function(req, res, next) {
 
-console.log("here we are");
 	var pitch = {};
 	var location = {};
 	var data = {};
@@ -29,39 +36,73 @@ console.log("here we are");
 	pitch.date = req.body.date;
 	pitch.time = req.body.time;
 
-	// location.city = req.body.city;
-	// location.state = req.body.state;
-	// location.address = req.body.address;
-	// location.zip = req.body.zip;
+	location.city = req.body.city;
+	location.state = req.body.state;
+	location.address = req.body.address;
+	location.zip = req.body.zip;
+    data.location = location;
+    data.pitch = pitch;
+    data.userID = req.body.userID;
 
-	address = req.body.address + " " + req.body.city + " " + req.body.state + " " + req.body.zip;
-	console.log(address);
-	//get locations coordinates
-	geocoder.geocode(address, function(err, data) {
-		//if (err) {next(err)};
-		console.log(data.status);
-		if (data.status !== 'OVER_QUERY_LIMIT' && data.status !== 'ZERO_RESULTS') {
-            location.lat = data.results[0].geometry.location.lat;
-			location.lng = data.results[0].geometry.location.lng;
-			console.log(data.results[0].geometry.location);
-        } else {
-            // google has a limit on the number of requests per rime 
-            return res.jsonp({error: "location does not exist"});
-        }
-		
-	});
-
-	data.location = location;
-	data.pitch = pitch;
-	data.userID = req.body.userID;
-	console.log(data);
-
-	Pitch.create(data, function (err, node) {
+    Pitch.create(data, function (err, node) {
         if (err) return next(err);
-        //res.redirect('/pitchs/' + pitch.id);
-        console.log(node);
-		res.jsonp(node._node);
+
+        fs.readFile(req.files.image.path, function(err, d){
+            dest = 'pitch'+node.id+'.'+req.files.image.originalname.split('.').pop()
+            s3Client.putObject({
+                Bucket: 'pitchproject',
+                Key: dest,
+                ACL: 'public-read',
+                Body: d,
+                ContentLength: req.files.image.size,
+            }, function(err, d) {
+                if (err)  next(err);
+
+                console.log(node.id);
+                Pitch.get(node.id, function(err, p){
+                    if (err) return next(err);
+
+                    p._node._data.data.image = dest;
+                    p.save(function(err){
+                        if (err) return next(err);
+                        User.get(data.userID, function(err, user) {
+                            if (err) return next(err);
+                            console.log(user);
+                            console.log(extend(null,p._node.data, data.location, {creator: user._node._data.data.username}, {id: p.id}));
+                            res.jsonp(extend(null,p._node.data, data.location, {creator: user._node._data.data.username}, {id: p.id}));
+                        });
+
+                    });
+                });
+
+
+
+            });
+        });
+
+
     });
+
+
+
+	// address = req.body.address + " " + req.body.city + " " + req.body.state + " " + req.body.zip;
+	// console.log(address);
+	// //get locations coordinates
+	// geocoder.geocode(address, function(err, data) {
+	// 	//if (err) {next(err)};
+	// 	console.log(data.status);
+	// 	if (data.status !== 'OVER_QUERY_LIMIT' && data.status !== 'ZERO_RESULTS') {
+ //            location.lat = data.results[0].geometry.location.lat;
+	// 		location.lng = data.results[0].geometry.location.lng;
+	// 		console.log(data.results[0].geometry.location);
+ //        } else {
+ //            // google has a limit on the number of requests per rime 
+ //            return res.jsonp({error: "location does not exist"});
+ //        }
+		
+	// });
+
+
 
 };
 

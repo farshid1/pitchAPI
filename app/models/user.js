@@ -138,7 +138,9 @@ User.prototype.getAttendingPitches = function (callback) {
     var query = [
         'MATCH (u:User)-[a:ATTENDS]->(p:Pitch)-[:LOCATED_IN]->(l:Location)',
         'WHERE ID(u) = {userId}',
-        'RETURN p, a, l',
+        'WITH a, u, p, l',
+        'MATCH (creator:User)-[c:CREATED]->(p)',
+        'RETURN a, p, l, creator, c',
         'ORDER BY a.joinTime' 
     ].join('\n')
 
@@ -158,10 +160,12 @@ User.prototype.getAttendingPitches = function (callback) {
                 var pitch = extend(null, results[i]['a']._data.data, 
                             results[i]['p']._data.data,
                             results[i]['l']._data.data,
+                            {creator:results[i]['creator']._data.data.username},
                             {id: results[i]['p'].id });
                 pitches.push(pitch);
 
             };
+
             return callback(null, pitches);
             
         }
@@ -316,7 +320,7 @@ User.create = function(data, callback) {
     db.query(query, params, function (err, results) {
         if (err) return callback(err);
         //console.log(results);
-        var user = new User(results[0]['user']['data']);
+        var user = new User(results[0]['user']);
         callback(null, user);
     });
 };

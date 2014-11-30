@@ -1,14 +1,28 @@
 var User = require('../models/user.js');
 var Pitch = require('../models/pitch.js');
-var multiparty = require('multiparty');
-var Dropbox = require("dropbox");
+var util = require('util');
 var geocoder = require('geocoder');
-var client = new Dropbox.Client({
-    key: "i61n5his3jx7r41",
-    secret: "c6t2w5o8ylxktmc"
+var extend = require('extend');
+
+var AWS = require('aws-sdk');
+var s3Client = new AWS.S3({
+  accessKeyId: process.env.AWS_ID,
+  secretAccessKey: process.env.AWS_SECRET,
+  // See: http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#constructor-property
 });
-
-
+var fs = require('fs');
+console.log(process.env.AWS_ID, process.env.AWS_SECRET);
+// var Uploader = require('s3-streaming-upload').Uploader;
+// var upload = null; 
+// var s3 = require('s3');
+// var awsS3Client = new AWS.S3(s3Options);
+// var options = {
+//   s3Client: awsS3Client,
+//   accessKeyId: process.env.AWS_ID,
+//   secretAccessKey: process.env.AWS_SECRET
+//   // more options available. See API docs below.
+// };
+// var client = s3.createClient(options);
 /**
  * GET /users
  */
@@ -25,17 +39,20 @@ exports.getAllUsers = function(req, res, next) {
 exports.getUserById = function(req, res, next) {
 	User.get(req.params.id, function(err, user) {
 		if (err) return next(err);
-		console.log(user._node.data);
-		res.jsonp(user._node.data);
+		//console.log(user._node.data);
+		userr =[];
+		userr.push(user._node.data);
+		res.jsonp(userr);
 	});
 }
 
 /**
- * POST /users
+ * POST /user
  */
 exports.createUser = function(req, res, next) {
 
 	user = {};
+	//console.log(req.files);
 	user.username = req.body.username;
 	user.displayName = req.body.displayName;
 	user.password = req.body.password;
@@ -43,24 +60,37 @@ exports.createUser = function(req, res, next) {
 	user.city = req.body.city;
 	user.state = req.body.state;
 
-	// var form = new multiparty.Form();
-
-	// form.parse(req, function(err, fields, files) {
-	// 	user.username = req.body.username;
-	// 	user.displayName = req.body.displayName;
-	// 	user.password = req.body.password;
-	// 	user.email = req.body.email;
-	// 	user.city = req.body.city;
-	// 	user.state = req.body.state;
- //    });
-	
 
 	User.create(user, function (err, node) {
         if (err) return next(err);
         //upload file
-        client.
-        console.log(node);
-		res.jsonp(node._node);
+        //console.log(node);
+        fs.readFile(req.files.image.path, function(err, data){
+        	dest = 'user'+node.id+'.'+req.files.image.originalname.split('.').pop()
+			s3Client.putObject({
+		        Bucket: 'pitchproject',
+		        Key: dest,
+		        ACL: 'public-read',
+		        Body: data,
+		        ContentLength: req.files.image.size,
+		      }, function(err, data) {
+		        if (err)  next(err);
+		        User.get(node.id, function(err, user) {
+		        	if (err) {next(err)};
+		        	user._node._data.data.image = dest;
+		        	user.save(function(err) {
+						if (err) return next(err);
+						console.log("success");
+						res.jsonp(extend(null,user._node.data, {id: user.id}));
+					});
+		        });
+		        
+		        //console.log("done", data);
+		        
+		        //console.log("https://s3.amazonaws.com/" + 'pitchproject' + '/' + 'pitch');
+		    });
+		});
+		
     });
 
 };
@@ -82,7 +112,7 @@ exports.updateUser = function(req, res, next) {
 		user.save(function(err) {
 			if (err) return next(err);
 			console.log("success");
-			res.jsonp(user);
+			res.jsonp(extend(null,user._node.data, {id: user.id}));
 		})
 		
 	})
@@ -152,6 +182,7 @@ exports.getAttendingPitches = function(req, res, next) {
             if (err) {
             	return res.jsonp(err);
             }
+            console.log(pitches[0]);
             if (pitches.length > 0) {
 				res.jsonp(pitches);
 			}
