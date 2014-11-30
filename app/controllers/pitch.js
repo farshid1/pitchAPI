@@ -206,6 +206,20 @@ exports.commentPitch = function(req, res, next) {
 	});
 };
 
+
+/**
+ * GET pitch/:id/attendants
+ */
+exports.getAttendants = function(req, res, next) {
+
+    Pitch.getAttendants(req.params.id, function(err, attendants){
+        if(err) return next(err);
+
+        res.jsonp(attendants);
+    });
+
+};
+
 /**
  * GET pitch/search/:lat/:lon
  */

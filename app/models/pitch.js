@@ -1,11 +1,11 @@
 var neo4j = require('neo4j');
 var db = new neo4j.GraphDatabase( 'http://pitchDB:8ectJEibffM5lK0wM5OZ@pitchdb.sb02.stations.graphenedb.com:24789');
 var User = require('./user.js');
+var extend = require('extend');
 
 // private constructor:
 
 var Pitch = module.exports = function Pitch(_node) {
-    console.log("here we are in constructor");
     this._node = _node;
 }
 
@@ -28,6 +28,7 @@ Object.defineProperty(Pitch.prototype, 'title', {
 
 Pitch.prototype.save = function (callback) {
     this._node.save(function (err) {
+        console.log("error from save: ",err)
         callback(err);
     });
 };
@@ -176,16 +177,15 @@ Pitch.updatePitch = function (id, callback) {
 Pitch.create = function (data, callback) {
     // construct a new instance of our class with the data, so it can
     // validate and extend it, etc., if we choose to do that in the future:
-    var pitchNode = db.createNode(data.pitch);
-    var p = new Pitch(pitchNode);
-    var locationNode = db.createNode(data.location);
-    var l = new Pitch(locationNode);
+//    var pitchNode = db.createNode(data.pitch);
+//    var p = new Pitch(pitchNode);
+//    var locationNode = db.createNode(data.location);
+//    var l = new Pitch(locationNode);
 
     var params = {
         pitch: data.pitch,
         location: data.location
     };
-    console.log(data);
     var query = [
         'MATCH (u:User)',
         'WHERE ID(u) = '+data.userID,
@@ -206,10 +206,43 @@ Pitch.create = function (data, callback) {
         }
         console.log(results);
         if (results.length > 0) {
-           var pitch = new Pitch(results[0]['p']['data']);
+           var pitch = new Pitch(results[0]['p']);
+            //console.log(pitch.id);
            return callback(null, pitch); 
         }
         return callback("was it made?");
             
     });
+};
+
+
+Pitch.getAttendants = function(pid, cb) {
+
+    var query = [
+        'MATCH (u:User)-[a:ATTENDS]->(p:Pitch)',
+        'WHERE ID(p) = '+ pid,
+        'RETURN u, a',
+        'ORDER BY a.time'
+    ].join('\n');
+
+    db.query(query, null, function(err, results){
+        if (err) return cb(err);
+        if (results.length > 0) {
+            var attendants = [];
+            for (var i = 0; i < results.length; i++) {
+                //TODO Change all the time names to time...
+                //console.log(results[i]['attendee']._data.data.displayName);
+                var attendant = extend(null, {attendant: results[i]['u']._data.data.username},
+                    {time: results[i]['a']._data.data.time});
+                attendants.push(attendant);
+
+            };
+            return cb(null, attendants);
+        }
+        return cb("not found");
+
+
+
+    });
+
 };

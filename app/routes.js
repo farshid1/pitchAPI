@@ -60,6 +60,9 @@ module.exports = function(router) {
 	router.route('/pitch/:id/comments')
 			.get(auth.isAuthenticated, pitch.getComments);
 
+    router.route('/pitch/:id/attendants')
+        .get(auth.isAuthenticated, pitch.getAttendants);
+
 	router.route('/pitch/search/:lat/:lon')
 			.get(auth.isAuthenticated, pitch.searchPitchByLocation);
 
