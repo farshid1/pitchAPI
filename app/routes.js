@@ -19,7 +19,10 @@ module.exports = function(router) {
 	// Users Routes
 	router.route('/user')
 			.get(user.getAllUsers)
-			.post(user.createUser);
+			.post(user.createUser)
+
+    router.route('/user/login')
+        .post(user.login);
 
 	router.route('/user/:id')
 			.get(auth.isAuthenticated, user.getUserById)
@@ -29,8 +32,7 @@ module.exports = function(router) {
 	router.route('/user/:id')
 			.get(auth.isAuthenticated, user.getUserByUsername);
 
-	router.route('/user/login')
-			.post(user.login);
+
 	//Action Routes
 	router.route('/user/:id/attend')
 			.get(auth.isAuthenticated, user.getAttendingPitches);

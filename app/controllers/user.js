@@ -152,7 +152,10 @@ exports.getUserByUsername = function(req, res, next) {
  // here find the user by username first then try to login
 exports.login = function(req, res, next) {
 
+    console.log("sdjksjfjsbdfjsbdfjhsdjhfshjdfjsdh");
+    console.log(req.body.username, req.body.password);
 	User.getUserByUsername(req.body.username, function(err, user) {
+        console.log("sdjksjfjsbdfjsbdfjhsdjhfshjdfjsdh");
         if (err) {
         	res.jsonp({status: err});
         	return;
@@ -219,14 +222,12 @@ exports.attendPitch = function(req, res, next) {
 		if (err) return next(err);
 		Pitch.get(req.params.pid, function(err, pitch) {
 			if (err) return next(err);
-            if (!user.isAttending(pitch)) {
-                user.attend(pitch, function(err, status) {
-                    if (err) return next(err);
-                    return res.jsonp({status: status});
-                });
-            }
 
-            return res.jsonp({status: "duplicate"});
+            user.attend(pitch, function(err, status) {
+                if (err) return next(err);
+                return res.jsonp({status: status});
+            });
+
 
 		});
 	});

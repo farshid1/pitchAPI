@@ -90,47 +90,73 @@ User.prototype.del = function (callback) {
 //         callback(null, following, others);
 //     });
 // };
-User.prototype.isAttending = function(pitch){
-    var userAttending = {};
-    var pitchAttending = {};
+//User.prototype.isAttending = function(pitch){
+//    var userAttending = {};
+//    var pitchAttending = {};
+//
+//    this._node.outgoing("ATTENDS", function(err, results){
+//        if (err) throw (err);
+//
+//        if (results.length > 0) {
+//            userAttending = results
+//        }
+//    });
+//
+//    pitch._node.incoming("ATTENDS", function(err, rs){
+//        if (err) throw (err);
+//
+//        if (rs.length > 0) {
+//            pitchAttending = rs;
+//        }
+//    });
+//
+//    for (var i=0; i<userAttending.length; i++) {
+//        for (var j=0; j<pitchAttending.length; j++) {
+//            if (userAttending[i] == pitchAttending[j]) {
+//                return true;
+//            }
+//        }
+//    }
+//    return false;
+//
+//
+//
+//};
 
-    this._node.outgoing("ATTENDS", function(err, results){
-        if (err) throw (err);
-
-        if (results.length > 0) {
-            userAttending = results
-        }
-    });
-
-    pitch._node.incoming("ATTENDS", function(err, rs){
-        if (err) throw (err);
-
-        if (rs.length > 0) {
-            pitchAttending = results;
-        }
-    });
-
-    for (var i=0; i<userAttending.length; i++) {
-        for (var j=0; j<pitchAttending.length; j++) {
-            if (userAttending[i] == pitchAttending[j]) {
-                return true;
-            }
-        }
-    }
-    return false;
-
-
-
-};
 User.prototype.attend = function (pitch, callback) {
 
-    var attend = {
-        time: new Date().getTime()
+    var query = [
+        'MATCH (u:User)-[a:ATTENDS]->(p:Pitch)',
+        'WHERE ID(u) = {userId} and ID(p) = {pitchId}',
+        'return a',
+    ].join('\n');
+
+    var params = {
+        userId: this.id,
+        pitchId: pitch.id
     };
-    this._node.createRelationshipTo(pitch._node, 'ATTENDS', attend, function (err, rel) {
-        if (err) return callback(err);
-        return callback(null, "success");
-    }); 
+
+    var node = this._node;
+
+    db.query(query, params, function(err, results) {
+       if (err) return callback(err);
+
+        console.log(results);
+        if (results.length > 0) {
+            return callback(null, "duplicate");
+        }
+        else {
+            var attend = {
+                time: new Date().getTime()
+            };
+            node.createRelationshipTo(pitch._node, 'ATTENDS', attend, function (err, rel) {
+                if (err) return callback(err);
+                return callback(null, "success");
+            });
+        }
+    });
+
+
 };
 
 User.prototype.unattend = function (pitchId, callback) {
@@ -245,7 +271,7 @@ User.prototype.getNotification = function (callback) {
         'MATCH (u:User)-[c:CREATED|ATTENDS]->(p:Pitch)<-[a:ATTENDS|COMMENTS]-(attendee)',
         'WHERE ID(u) = {userId}',
         'RETURN p, a, type(a) as t, attendee',
-        'ORDER BY a.time',
+        'ORDER BY a.time DESC',
     ].join('\n');
 
     var params = {
@@ -261,8 +287,9 @@ User.prototype.getNotification = function (callback) {
                 //TODO Change all the time names to time...
                 console.log(results[i]['attendee']._data.data.displayName);
                 var notification = extend(null, {pitch: results[i]['p']._data.data.title},
-                            {detail: results[i]['a']._data.data},
+                            {time: results[i]['a']._data.data.time},
                             {user: results[i]['attendee']._data.data.displayName},
+                            {image: results[i]['p']._data.data.image},
                             {type: results[i].t});
                 notifications.push(notification);
 

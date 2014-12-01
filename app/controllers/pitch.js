@@ -215,6 +215,7 @@ exports.getAttendants = function(req, res, next) {
     Pitch.getAttendants(req.params.id, function(err, attendants){
         if(err) return next(err);
 
+        console.log(attendants);
         res.jsonp(attendants);
     });
 

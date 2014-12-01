@@ -234,7 +234,10 @@ Pitch.getAttendants = function(pid, cb) {
                 //console.log(results[i]['attendee']._data.data.displayName);
                 //console.log(results[i]['u'].id);
                 var attendant = extend(null, {attendant: results[i]['u']._data.data.username},
-                    {time: results[i]['a']._data.data.time}, {userId: results[i]['u'].id});
+                    {time: results[i]['a']._data.data.time},
+                    {userId: results[i]['u'].id},
+                    {image: results[i]['u']._data.data.image});
+                console.log(attendant);
                 attendants.push(attendant);
 
             };
